@@ -1,4 +1,4 @@
-#`pg-b2`
+# `pg-b2`
 
 Takes a `pg_dump` from a postgresql database and uploads it to Backblaze B2.
 
