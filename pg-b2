@@ -43,7 +43,7 @@ trap "echo cleaning up '$DUMPLOC'; rm '$DUMPLOC'" EXIT
 
 pg_dump "$TABLE_NAME" | gzip > "$DUMPLOC" || die "failed to dump $TABLE_NAME"
 
-FN="$FN_PREFIX$TABLE_NAME.pgdump"
+FN="$FN_PREFIX$TABLE_NAME.pgdump.gz"
 echo "trying to upload <$DUMPLOC> to <$BUCKET_NAME:$FN>..."
 _b2 upload_file "$BUCKET_NAME" "$DUMPLOC" "$FN" \
     || die "failed to upload $DUMPLOC to $BUCKET_NAME:$FN"
