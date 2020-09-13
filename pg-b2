@@ -2,7 +2,7 @@
 # gzips a pg_dump of a table and uploads it to Backblaze B2.
 
 set -e
-set pipefail
+set -o pipefail
 
 die() {
     echo "Fatal: $*" >&2
