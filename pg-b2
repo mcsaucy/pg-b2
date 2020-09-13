@@ -23,11 +23,11 @@ _b2() {
 }
 
 if [[ "$#" -lt 2 || "$#" -gt 3 ]]; then
-    die "Usage: $0 bucket_name table_name [ filename_prefix ]"
+    die "Usage: $0 table_name bucket_name [ filename_prefix ]"
 fi
 
-BUCKET_NAME="${1?}"
-TABLE_NAME="${2?}"
+TABLE_NAME="${1?}"
+BUCKET_NAME="${2?}"
 FN_PREFIX="$3"
 
 BASEDIR="${HOME:-/tmp}"
