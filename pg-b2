@@ -1,0 +1,48 @@
+#!/bin/bash
+# Takes a pg_dump of a file and uploads it to Backblaze B2.
+
+set -e
+
+die() {
+    echo "Fatal: $*" >&2
+    exit 1
+}
+
+_b2() {
+    if command -v b2 >/dev/null; then
+        command b2 "$@"
+        return
+    fi
+
+    if command -v backblaze-b2 >/dev/null; then
+        command backblaze-b2 "$@"
+        return
+    fi
+
+    die "Can't find b2 or backblaze-b2 command"
+}
+
+if [[ "$#" -lt 2 || "$#" -gt 3 ]]; then
+    die "Usage: $0 bucket_name table_name [ filename_prefix ]"
+fi
+
+BUCKET_NAME="${1?}"
+TABLE_NAME="${2?}"
+FN_PREFIX="$3"
+
+BASEDIR="${HOME:-/tmp}"
+PGB2_SCRATCH_DIR="${PGB2_SCRATCH_DIR:-$BASEDIR/.pgb2_scratch}"
+
+mkdir -p "$PGB2_SCRATCH_DIR" || die "failed to make scratch dir"
+DUMPLOC="$(mktemp "${PGB2_SCRATCH_DIR}/pgdump.XXXXXX")" \
+    || die "failed to make pgdump file"
+
+# shellcheck disable=SC2064
+trap "echo cleaning up '$DUMPLOC'; rm '$DUMPLOC'" EXIT
+
+pg_dump "$TABLE_NAME" > "$DUMPLOC" || die "failed to dump $TABLE_NAME"
+
+FN="$FN_PREFIX$TABLE_NAME.pgdump"
+echo "trying to upload <$DUMPLOC> to <$BUCKET_NAME:$FN>..."
+_b2 upload_file "$BUCKET_NAME" "$DUMPLOC" "$FN" \
+    || die "failed to upload $DUMPLOC to $BUCKET_NAME:$FN"
